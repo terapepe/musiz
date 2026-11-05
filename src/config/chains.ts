@@ -12,12 +12,15 @@ export const robinhood = defineChain({
 
 export const evmChains = [base, bsc, robinhood] as const
 
-// DexScreener chain slugs + explorer token URLs per network
+// uni = Uniswap app chain slug, dex = DexScreener slug, explorer = token page URL
 export const networks = [
-  { key: 'base', name: 'Base', vm: 'evm', chainId: base.id, dex: 'base', explorer: 'https://basescan.org/token/' },
-  { key: 'bsc', name: 'BNB Chain', vm: 'evm', chainId: bsc.id, dex: 'bsc', explorer: 'https://bscscan.com/token/' },
-  { key: 'robinhood', name: 'Robinhood', vm: 'evm', chainId: robinhood.id, dex: 'robinhood', explorer: import.meta.env.VITE_ROBINHOOD_EXPLORER || '' },
-  { key: 'solana', name: 'Solana', vm: 'svm', chainId: 0, dex: 'solana', explorer: 'https://solscan.io/token/' },
+  { key: 'base', uni: 'base', name: 'Base', vm: 'evm', chainId: base.id, dex: 'base', explorer: 'https://basescan.org/token/' },
+  { key: 'bsc', uni: 'bnb', name: 'BNB Chain', vm: 'evm', chainId: bsc.id, dex: 'bsc', explorer: 'https://bscscan.com/token/' },
+  { key: 'robinhood', uni: 'robinhood', name: 'Robinhood', vm: 'evm', chainId: robinhood.id, dex: 'robinhood', explorer: import.meta.env.VITE_ROBINHOOD_EXPLORER || '' },
+  { key: 'solana', uni: 'solana', name: 'Solana', vm: 'svm', chainId: 0, dex: 'solana', explorer: 'https://solscan.io/token/' },
 ] as const
 
 export type Network = (typeof networks)[number]
+
+export const uniswapBuy = (n: Network, address: string) =>
+  `https://app.uniswap.org/swap?chain=${n.uni}&outputCurrency=${address}`

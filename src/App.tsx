@@ -4,6 +4,7 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import token from './config/token.json'
 import { ConnectModal, short } from './wallet/ConnectModal'
 import { useTokenMarkets, Market } from './hooks/useTokenMarkets'
+import { ContractStrip } from './components/ContractStrip'
 
 const usd = (n?: number, d = 0) =>
   n == null || Number.isNaN(n) ? '—' : n < 1 && d === 0
@@ -105,13 +106,15 @@ export default function App() {
             <h1>Press the record<br /><em>before it exists.</em></h1>
             <p className="lede">Fans fund the album. Smart contracts hold the money. Artists unlock it groove by groove, one finished milestone at a time.</p>
             <div className="cta">
-              <a className="btn" href="#drops">Back a pressing</a>
+              <a className="btn" href="#buy">Buy ${token.symbol}</a>
               <a className="btn ghost" href={token.x} target="_blank" rel="noreferrer">Apply as artist →</a>
             </div>
             <ul className="chains"><li>Solana</li><li>Base</li><li>BNB Chain</li><li>Robinhood</li></ul>
           </div>
           <Record />
         </section>
+
+        <ContractStrip />
 
         <section id="how" className="tracklist">
           <div className="side">Side A — How a pressing works</div>
