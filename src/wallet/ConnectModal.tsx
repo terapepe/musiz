@@ -1,7 +1,13 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletReadyState } from '@solana/wallet-adapter-base'
-import { evmChains } from '../config/chains'
+import { evmChains, networks } from '../config/chains'
+
+export const ChainIcons = ({ vm }: { vm?: 'evm' | 'svm' }) => (
+  <span className="chain-icons">
+    {networks.filter((n) => !vm || n.vm === vm).map((n) => <img key={n.key} src={n.icon} alt={n.name} title={n.name} />)}
+  </span>
+)
 
 export const short = (a?: string) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '')
 
@@ -23,12 +29,12 @@ export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => 
     <div className="modal-back" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Connect wallet">
         <div className="modal-head">
-          <span>Plug in</span>
+          <span>Connect MusiZ</span>
           <button className="x" onClick={onClose} aria-label="Close">×</button>
         </div>
 
         <section>
-          <h4>EVM · Base · BNB · Robinhood</h4>
+          <h4><ChainIcons vm="evm" /> Base · BNB Chain · Robinhood</h4>
           {evm.isConnected ? (
             <div className="connected">
               <code>{short(evm.address)}</code>
@@ -50,7 +56,7 @@ export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => 
         </section>
 
         <section>
-          <h4>Solana</h4>
+          <h4><ChainIcons vm="svm" /> Solana</h4>
           {sol.connected ? (
             <div className="connected">
               <code>{short(sol.publicKey?.toBase58())}</code>

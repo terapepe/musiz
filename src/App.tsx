@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAccount } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import token from './config/token.json'
-import { ConnectModal, short } from './wallet/ConnectModal'
+import { ConnectModal, ChainIcons, short } from './wallet/ConnectModal'
 import { useTokenMarkets, Market } from './hooks/useTokenMarkets'
 import { ContractStrip } from './components/ContractStrip'
 
@@ -96,6 +96,7 @@ export default function App() {
           <a href="#token">${token.symbol}</a>
           <a href="#drops">Drops</a>
         </nav>
+        <ChainIcons />
         <button className="btn" onClick={() => setOpen(true)}>{label || 'Connect wallet'}</button>
       </header>
 
