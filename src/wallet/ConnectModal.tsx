@@ -1,11 +1,11 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletReadyState } from '@solana/wallet-adapter-base'
-import { evmChains, networks } from '../config/chains'
+import { activeEvm, activeEvmChains, activeNetworks, hasSolana } from '../config/chains'
 
 export const ChainIcons = ({ vm }: { vm?: 'evm' | 'svm' }) => (
   <span className="chain-icons">
-    {networks.filter((n) => !vm || n.vm === vm).map((n) => <img key={n.key} src={n.icon} alt={n.name} title={n.name} />)}
+    {activeNetworks.filter((n) => !vm || n.vm === vm).map((n) => <img key={n.key} src={n.icon} alt={n.name} title={n.name} />)}
   </span>
 )
 
@@ -33,13 +33,13 @@ export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => 
           <button className="x" onClick={onClose} aria-label="Close">×</button>
         </div>
 
-        <section>
-          <h4><ChainIcons vm="evm" /> Base · BNB Chain · Robinhood</h4>
+        {activeEvm.length > 0 && <section>
+          <h4><ChainIcons vm="evm" /> {activeEvm.map((n) => n.name).join(' · ')}</h4>
           {evm.isConnected ? (
             <div className="connected">
               <code>{short(evm.address)}</code>
               <select value={evm.chainId} onChange={(e) => switchChain({ chainId: Number(e.target.value) })}>
-                {evmChains.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {activeEvmChains.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
               <button className="ghost" onClick={() => disconnect()}>Disconnect</button>
             </div>
@@ -53,9 +53,9 @@ export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => 
             <p className="muted">No EVM wallet detected in this browser.</p>
           )}
           {error && <p className="err">{error.message.split('\n')[0]}</p>}
-        </section>
+        </section>}
 
-        <section>
+        {hasSolana && <section>
           <h4><ChainIcons vm="svm" /> Solana</h4>
           {sol.connected ? (
             <div className="connected">
@@ -79,7 +79,7 @@ export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => 
           ) : (
             <p className="muted">No Solana wallet detected. Install Phantom, Solflare or Backpack.</p>
           )}
-        </section>
+        </section>}
       </div>
     </div>
   )

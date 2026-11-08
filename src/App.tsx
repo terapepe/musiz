@@ -3,6 +3,7 @@ import { useAccount } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import token from './config/token.json'
 import { ConnectModal, ChainIcons, short } from './wallet/ConnectModal'
+import { activeNetworks, chainCount, isSingle } from './config/chains'
 import { useTokenMarkets, Market } from './hooks/useTokenMarkets'
 import { ContractStrip } from './components/ContractStrip'
 
@@ -110,7 +111,7 @@ export default function App() {
               <a className="btn" href="#buy">Buy ${token.symbol}</a>
               <a className="btn ghost" href={token.x} target="_blank" rel="noreferrer">Apply as artist →</a>
             </div>
-            <ul className="chains"><li>Solana</li><li>Base</li><li>BNB Chain</li><li>Robinhood</li></ul>
+            <ul className="chains">{activeNetworks.map((n) => <li key={n.key}>{n.name}</li>)}</ul>
           </div>
           <Record />
         </section>
@@ -150,7 +151,7 @@ export default function App() {
 
         <section id="token" className="token">
           <div className="side">The label — ${token.symbol}</div>
-          <p className="lede small">One token, bridged across four chains. EVM networks share a single contract address. Live market data from DexScreener, refreshed every minute.</p>
+          <p className="lede small">{isSingle ? `One token on ${activeNetworks[0].name}.` : `One token, bridged across ${chainCount(activeNetworks.length)}. EVM networks share a single contract address.`} Live market data from DexScreener, refreshed every minute.</p>
           <div className="table">
             <div className="trow head"><div>Network</div><div>Contract</div><div>Price</div><div>24h</div><div>Liquidity</div><div>Vol 24h</div><div /></div>
             {isLoading ? <div className="trow"><span className="muted">Loading markets…</span></div> : markets?.map((m) => <TokenRow key={m.network.key} m={m} />)}

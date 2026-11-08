@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import token from '../config/token.json'
-import { networks, uniswapBuy } from '../config/chains'
+import { activeEvm, activeNetworks, chainCount, uniswapBuy } from '../config/chains'
 
 function CopyCA({ address }: { address: string }) {
   const [copied, setCopied] = useState(false)
@@ -18,18 +18,18 @@ function CopyCA({ address }: { address: string }) {
 }
 
 export function ContractStrip() {
-  const evm = networks.filter((n) => n.vm === 'evm')
-  const sol = networks.find((n) => n.vm === 'svm')!
+  const evm = activeEvm
+  const sol = activeNetworks.find((n) => n.vm === 'svm')
   const evmCA = token.evmAddress.trim()
   const solCA = token.solanaAddress.trim()
 
   return (
     <section className="cas" id="buy">
       <div className="side">Get ${token.symbol}</div>
-      <div className="ca-grid">
-        <article className="ca-card evm">
+      <div className={`ca-grid${evm.length && sol ? '' : ' one'}`}>
+        {evm.length > 0 && <article className="ca-card evm">
           <div className="ca-top">
-            <h3>One address, three chains</h3>
+            <h3>{evm.length > 1 ? `One address, ${chainCount(evm.length)}` : evm[0].name}</h3>
             <ul className="pills">{evm.map((n) => <li key={n.key}>{n.name}</li>)}</ul>
           </div>
           <CopyCA address={evmCA} />
@@ -40,9 +40,9 @@ export function ContractStrip() {
               </a>
             ))}
           </div>
-        </article>
+        </article>}
 
-        <article className="ca-card sol">
+        {sol && <article className="ca-card sol">
           <div className="ca-top">
             <h3>Solana</h3>
             <ul className="pills"><li>SPL</li></ul>
@@ -53,7 +53,7 @@ export function ContractStrip() {
               Buy on Solana ↗
             </a>
           </div>
-        </article>
+        </article>}
       </div>
       <p className="footnote">Always verify the contract address here or on <a href={token.x} target="_blank" rel="noreferrer">@MusizXyz</a> before buying. Buy links open Uniswap.</p>
     </section>

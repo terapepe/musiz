@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import token from '../config/token.json'
-import { networks, Network } from '../config/chains'
+import { activeNetworks, Network } from '../config/chains'
 
 export type Market = {
   network: Network
@@ -40,7 +40,7 @@ async function fetchMarket(n: Network): Promise<Market> {
 export function useTokenMarkets() {
   return useQuery({
     queryKey: ['markets', token.evmAddress, token.solanaAddress],
-    queryFn: () => Promise.all(networks.map((n) => fetchMarket(n).catch(() => ({ network: n, address: addrFor(n) }) as Market))),
+    queryFn: () => Promise.all(activeNetworks.map((n) => fetchMarket(n).catch(() => ({ network: n, address: addrFor(n) }) as Market))),
     refetchInterval: 60_000,
   })
 }
