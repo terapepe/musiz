@@ -55,7 +55,7 @@ export function ContractStrip() {
           </div>
         </article>}
       </div>
-      <p className="footnote">Always verify the contract address here or on <a href={token.x} target="_blank" rel="noreferrer">@MusizXyz</a> before buying. Buy links open Uniswap.</p>
+      <p className="footnote">Always verify the contract address here or on <a href={token.x} target="_blank" rel="noreferrer">@{token.x.split('/').pop()}</a> before buying. Buy links open Uniswap.</p>
     </section>
   )
 }

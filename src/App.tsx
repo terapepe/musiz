@@ -163,14 +163,14 @@ export default function App() {
           <div className="empty">
             <div className="empty-disc" />
             <h3>The first pressing hasn't dropped yet.</h3>
-            <p>Artist campaigns appear here as soon as they go live onchain. Follow <a href={token.x} target="_blank" rel="noreferrer">@MusizXyz</a> for the first drop.</p>
+            <p>Artist campaigns appear here as soon as they go live onchain. Follow <a href={token.x} target="_blank" rel="noreferrer">@{token.x.split('/').pop()}</a> for the first drop.</p>
           </div>
         </section>
       </main>
 
       <footer>
         <span>musiz.xyz · fan-funded music, settled onchain</span>
-        <a href={token.x} target="_blank" rel="noreferrer">X / @MusizXyz</a>
+        <a href={token.x} target="_blank" rel="noreferrer">X / @{token.x.split('/').pop()}</a>
       </footer>
 
       <ConnectModal open={open} onClose={() => setOpen(false)} />
