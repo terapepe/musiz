@@ -3,9 +3,9 @@ import { useAccount } from 'wagmi'
 import { useWallet } from '@solana/wallet-adapter-react'
 import token from './config/token.json'
 import { ConnectModal, ChainIcons, short } from './wallet/ConnectModal'
-import { activeNetworks, chainCount, isSingle } from './config/chains'
+import { activeEvm, activeNetworks, chainCount, hasSolana, isSingle, names, primary } from './config/chains'
 import { useTokenMarkets, Market } from './hooks/useTokenMarkets'
-import { ContractStrip } from './components/ContractStrip'
+import { ContractStrip, CopyCAButtons } from './components/ContractStrip'
 
 const usd = (n?: number, d = 0) =>
   n == null || Number.isNaN(n) ? '—' : n < 1 && d === 0
@@ -20,8 +20,8 @@ const STEPS = [
 ]
 
 const TIERS = [
-  { name: 'Bronze', perks: ['Early listen before release', 'Name in the digital liner notes'], note: 'Compressed NFT on Solana · near-zero fee' },
-  { name: 'Silver', perks: ['Everything in Bronze', 'Exclusive merch drop', 'Priority show tickets'], note: 'Mint on Base or BNB Chain' },
+  { name: 'Bronze', perks: ['Early listen before release', 'Name in the digital liner notes'], note: hasSolana ? 'Compressed NFT on Solana · near-zero fee' : `NFT on ${primary.name} · low fee` },
+  { name: 'Silver', perks: ['Everything in Bronze', 'Exclusive merch drop', 'Priority show tickets'], note: `Mint on ${names(activeEvm.length ? activeEvm : activeNetworks)}` },
   { name: 'Gold', perks: ['Everything in Silver', 'Studio session invite', 'Backer-only stems'], note: 'Limited per pressing' },
 ]
 
@@ -107,8 +107,9 @@ export default function App() {
             <p className="eyebrow">Onchain pressing plant for independent artists</p>
             <h1>Press the record<br /><em>before it exists.</em></h1>
             <p className="lede">Fans fund the album. Smart contracts hold the money. Artists unlock it groove by groove, one finished milestone at a time.</p>
+            {isSingle && primary.tagline && <p className="net-tagline">{primary.name} · {primary.tagline}</p>}
             <div className="cta">
-              <a className="btn" href="#buy">Buy ${token.symbol}</a>
+              <CopyCAButtons />
               <a className="btn ghost" href={token.x} target="_blank" rel="noreferrer">Apply as artist →</a>
             </div>
             <ul className="chains">{activeNetworks.map((n) => <li key={n.key}>{n.name}</li>)}</ul>

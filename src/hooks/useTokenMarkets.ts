@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import token from '../config/token.json'
-import { activeNetworks, Network } from '../config/chains'
+import { activeNetworks, caOf, Network } from '../config/chains'
 
 export type Market = {
   network: Network
@@ -14,7 +14,7 @@ export type Market = {
   pairUrl?: string
 }
 
-const addrFor = (n: Network) => (n.vm === 'svm' ? token.solanaAddress : token.evmAddress).trim()
+const addrFor = (n: Network) => caOf(n)
 
 async function fetchMarket(n: Network): Promise<Market> {
   const address = addrFor(n)
