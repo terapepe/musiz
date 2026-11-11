@@ -6,6 +6,7 @@ import { ConnectModal, ChainIcons, short } from './wallet/ConnectModal'
 import { activeEvm, activeNetworks, chainCount, hasSolana, isSingle, names, primary } from './config/chains'
 import { useTokenMarkets, Market } from './hooks/useTokenMarkets'
 import { ContractStrip, CopyCAButtons } from './components/ContractStrip'
+import { MusicSection } from './music/MusicSection'
 
 const usd = (n?: number, d = 0) =>
   n == null || Number.isNaN(n) ? '—' : n < 1 && d === 0
@@ -92,6 +93,7 @@ export default function App() {
       <header className="nav">
         <a href="/" className="logo">musiz<span>.xyz</span></a>
         <nav>
+          <a href="#music">Music NFTs</a>
           <a href="#how">How it works</a>
           <a href="#passes">Passes</a>
           <a href="#token">${token.symbol}</a>
@@ -118,6 +120,8 @@ export default function App() {
         </section>
 
         <ContractStrip />
+
+        <MusicSection />
 
         <section id="how" className="tracklist">
           <div className="side">Side A — How a pressing works</div>
