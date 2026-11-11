@@ -65,7 +65,7 @@ function TokenRow({ m }: { m: Market }) {
       <div className="tnet">{m.network.name}</div>
       {m.address ? (
         <button className="ca" title="Copy contract address" onClick={() => { navigator.clipboard.writeText(m.address); setCopied(true); setTimeout(() => setCopied(false), 1200) }}>
-          {copied ? 'Copied' : short(m.address)}
+          <code>{m.address}</code><span className="copy">{copied ? 'Copied ✓' : 'Copy'}</span>
         </button>
       ) : <span className="muted">CA soon</span>}
       <div className="num">{live ? usd(m.priceUsd) : '—'}</div>

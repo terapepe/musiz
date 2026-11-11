@@ -96,12 +96,13 @@ section { padding: 96px 0; border-top: 1px solid var(--line); }
 .tbody small { font: 11px var(--mono); opacity: .65; }
 
 .table { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.trow { display: grid; grid-template-columns: 1.1fr 1.1fr .9fr .7fr .9fr .9fr 1fr; gap: 12px; align-items: center; padding: 16px 20px; border-top: 1px solid var(--line); }
+.trow { display: grid; grid-template-columns: .8fr 2.6fr .8fr .6fr .8fr .8fr .9fr; gap: 12px; align-items: center; padding: 16px 20px; border-top: 1px solid var(--line); }
 .trow.head { border-top: 0; background: var(--ink-2); font: 11px var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--paper-dim); }
 .tnet { font-weight: 600; }
 .num { font: 14px var(--mono); }
 .up { color: var(--up); } .down { color: var(--down); }
-.ca { background: var(--ink-2); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font: 13px var(--mono); justify-self: start; }
+.ca { display: flex; align-items: center; gap: 10px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font: 13px var(--mono); justify-self: stretch; text-align: left; }
+.ca code { word-break: break-all; color: var(--paper); flex: 1; font-size: 12px; }
 .links { display: flex; gap: 12px; font-size: 13px; justify-content: end; }
 .links a { color: var(--paper-dim); }
 .muted { color: var(--paper-dim); font-size: 14px; }
@@ -136,6 +137,7 @@ footer { display: flex; justify-content: space-between; padding: 32px 24px; bord
   .record-wrap { justify-self: center; max-width: 360px; }
   .tickets { grid-template-columns: 1fr; }
   .trow { grid-template-columns: 1fr 1fr; }
+  .trow .ca { grid-column: 1 / -1; }
   .trow.head { display: none; }
   .tracklist li { grid-template-columns: 44px 1fr; }
   .len { display: none; }
@@ -168,3 +170,11 @@ footer { display: flex; justify-content: space-between; padding: 32px 24px; bord
 .nav .chain-icons img { width: 26px; height: 26px; }
 .modal h4 { display: flex; align-items: center; gap: 10px; }
 .modal h4 .chain-icons img { width: 20px; height: 20px; }
+
+/* hero: full CA, always readable */
+.hero-cas { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 620px; }
+.hero-ca { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; background: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; text-align: left; transition: border-color .15s; }
+.hero-ca:hover { border-color: var(--accent); }
+.hero-ca-tag { flex: none; font: 700 12px var(--mono); padding: 6px 10px; border-radius: 8px; background: var(--accent); color: var(--accent-ink, var(--ink)); }
+.hero-ca code { flex: 1; font: 500 clamp(12px, 1.25vw, 15px) var(--mono); color: var(--paper); word-break: break-all; }
+main { overflow-x: clip; }

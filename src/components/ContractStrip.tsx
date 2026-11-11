@@ -22,15 +22,17 @@ export function CopyCAButtons() {
   const [done, setDone] = useState('')
   const live = caGroups.filter((g) => g.ca)
   if (!live.length) return <button className="btn" disabled>CA coming soon</button>
-  return <>{live.map((g) => {
+  return <div className="hero-cas">{live.map((g) => {
     const color = g.nets.length === 1 ? g.nets[0].color : undefined
     return (
-      <button key={g.id} className="btn" style={color ? { background: color, color: inkOn(color) } : undefined}
+      <button key={g.id} className="hero-ca" title={`Copy ${g.tag} CA`}
         onClick={() => { navigator.clipboard.writeText(g.ca); setDone(g.id); setTimeout(() => setDone(''), 1200) }}>
-        {done === g.id ? 'Copied ✓' : `Copy ${g.tag} CA`}
+        <span className="hero-ca-tag" style={color ? { background: color, color: inkOn(color) } : undefined}>{g.tag} CA</span>
+        <code>{g.ca}</code>
+        <span className="copy">{done === g.id ? 'Copied ✓' : 'Copy'}</span>
       </button>
     )
-  })}</>
+  })}</div>
 }
 
 export function ContractStrip() {
