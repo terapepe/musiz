@@ -17,6 +17,14 @@ const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
 const robinhood = defineChain({ id: 4663, name: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.nodeflare.app/robinhood/public'] } } })
 const CHAINS = { robinhood, base, bsc }
 
+// Load contracts/.env (git-ignored) without overriding variables already set in the shell
+const envFile = path.join(here, '.env')
+if (fs.existsSync(envFile)) {
+  for (const line of fs.readFileSync(envFile, 'utf8').split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)
+    if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^["']|["']$/g, '')
+  }
+}
 const { PRIVATE_KEY, NETWORK, TREASURY, RPC_URL } = process.env
 const chain = CHAINS[NETWORK]
 if (!PRIVATE_KEY || !chain || !TREASURY) {
