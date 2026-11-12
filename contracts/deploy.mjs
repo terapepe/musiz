@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 const cfgPath = path.join(here, '../src/config/token.json')
 const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
 
-const robinhood = defineChain({ id: 4663, name: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.nodeflare.app/robinhood/public'] } } })
+const robinhood = defineChain({ id: 4663, name: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.mainnet.chain.robinhood.com'] } } })
 const CHAINS = { robinhood, base, bsc }
 
 // Load contracts/.env (git-ignored) without overriding variables already set in the shell
