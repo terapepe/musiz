@@ -1,6 +1,7 @@
 // End-to-end test on an in-process EVM (ganache). Test-only ERC-20 is compiled inline.
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import assert from 'assert/strict'
 import { createRequire } from 'module'
 import ganache from 'ganache'
@@ -8,7 +9,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { createWalletClient, createPublicClient, custom, parseUnits, decodeEventLog } from 'viem'
 const require = createRequire(import.meta.url)
 const solc = require('solc')
-const here = path.dirname(new URL(import.meta.url).pathname)
+const here = path.dirname(fileURLToPath(import.meta.url))
 
 const tokenSrc = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;

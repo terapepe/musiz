@@ -5,11 +5,12 @@
 // Optional: RPC_URL, BURN_BPS (default 200 = 2%), FEE_BPS (default 300 = 3%), MIN_HOLD (whole tokens, default 1000)
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { createPublicClient, createWalletClient, http, erc20Abi, parseUnits, defineChain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { base, bsc } from 'viem/chains'
 
-const here = path.dirname(new URL(import.meta.url).pathname)
+const here = path.dirname(fileURLToPath(import.meta.url))
 const cfgPath = path.join(here, '../src/config/token.json')
 const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
 

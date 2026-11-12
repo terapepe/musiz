@@ -1,10 +1,11 @@
 // Compiles MusizMusic.sol → build/MusizMusic.json and writes the ABI for the frontend.
 import fs from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
 const solc = require('solc')
-const here = path.dirname(new URL(import.meta.url).pathname)
+const here = path.dirname(fileURLToPath(import.meta.url))
 
 const input = {
   language: 'Solidity',
