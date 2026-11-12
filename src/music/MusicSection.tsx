@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { erc20Abi, formatUnits, parseUnits, type Address } from 'viem'
+import { erc20Abi, formatUnits, keccak256, parseUnits, toHex, type Address } from 'viem'
 import { useAccount, useConfig, useReadContract, useReadContracts, useSwitchChain, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 import token from '../config/token.json'
@@ -14,6 +14,10 @@ const musicOf = (n: Network) => ((MUSIC[n.key] || '').trim() as Address) || unde
 // ipfs://CID/x → gateway, ar://ID → arweave.net
 export const media = (u: string) =>
   u.startsWith('ipfs://') ? GW + u.slice(7).replace(/^ipfs\//, '') : u.startsWith('ar://') ? 'https://arweave.net/' + u.slice(5) : u
+
+// ?preview in the URL renders the full Music UI before the contract is deployed (actions disabled)
+const PREVIEW = typeof location !== 'undefined' && new URLSearchParams(location.search).has('preview')
+const NOT_LIVE = 'Opens when the music contract is live.'
 
 const fmt = (v: bigint, d: number) => Number(formatUnits(v, d)).toLocaleString('en', { maximumFractionDigits: 4 })
 
@@ -53,14 +57,15 @@ function useTokenTx(n: Network, spender: Address) {
   return { run, busy, err, writeContractAsync, address }
 }
 
-function TrackCard({ n, music, id, t, decimals, onDone }: { n: Network; music: Address; id: bigint; t: Track; decimals: number; onDone: () => void }) {
+function TrackCard({ n, music, id, t, decimals, onDone, preview }: { n: Network; music: Address; id: bigint; t: Track; decimals: number; onDone: () => void; preview?: boolean }) {
   const [qty, setQty] = useState(1)
   const tx = useTokenTx(n, music)
   const soldOut = t.maxSupply > 0n && t.minted >= t.maxSupply
   const left = t.maxSupply > 0n ? Number(t.maxSupply - t.minted) : Infinity
   const total = t.price * BigInt(qty)
 
-  const buy = () => tx.run('Minting…', total, () =>
+  const [note, setNote] = useState('')
+  const buy = () => preview ? setNote(NOT_LIVE) : tx.run('Minting…', total, () =>
     tx.writeContractAsync({ chainId: n.chainId, address: music, abi: musicAbi, functionName: 'mint', args: [id, BigInt(qty)] }),
   ).then((ok) => ok && onDone())
 
@@ -72,12 +77,12 @@ function TrackCard({ n, music, id, t, decimals, onDone }: { n: Network; music: A
       <div className="track-body">
         <h3>{t.name}</h3>
         <p className="track-artist" title="Artist"><code>{t.artist}</code></p>
-        <audio controls preload="none" src={media(t.audio)} />
+        {t.audio && <audio controls preload="none" src={media(t.audio)} />}
         <div className="track-meta">
           <span><b>{fmt(t.price, decimals)}</b> {SYM}</span>
           <span>{t.minted.toString()}{t.maxSupply > 0n ? ` / ${t.maxSupply}` : ''} minted</span>
         </div>
-        {tx.address ? (
+        {tx.address || preview ? (
           <div className="track-buy">
             <input type="number" min={1} max={Math.min(left, 100)} value={qty} disabled={soldOut}
               onChange={(e) => setQty(Math.max(1, Math.min(Number(e.target.value) || 1, left, 100)))} />
@@ -86,23 +91,25 @@ function TrackCard({ n, music, id, t, decimals, onDone }: { n: Network; music: A
             </button>
           </div>
         ) : <p className="muted">Connect an EVM wallet to mint.</p>}
-        {tx.err && <p className="err">{tx.err}</p>}
+        {(tx.err || note) && <p className="err">{tx.err || note}</p>}
       </div>
     </article>
   )
 }
 
-function CreateTrack({ n, music, decimals, minHold, burnBps, feeBps, onDone }: { n: Network; music: Address; decimals: number; minHold: bigint; burnBps: number; feeBps: number; onDone: () => void }) {
+function CreateTrack({ n, music, decimals, minHold, burnBps, feeBps, onDone, preview }: { n: Network; music: Address; decimals: number; minHold: bigint; burnBps: number; feeBps: number; onDone: () => void; preview?: boolean }) {
   const tx = useTokenTx(n, music)
   const [f, setF] = useState({ name: '', image: '', audio: '', price: '', max: '' })
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value })
   const { data: bal } = useReadContract({ chainId: n.chainId, address: caOf(n) as Address, abi: erc20Abi, functionName: 'balanceOf', args: tx.address ? [tx.address] : undefined, query: { enabled: !!tx.address, refetchInterval: 15_000 } })
-  const enough = bal != null && bal >= minHold
+  const [note, setNote] = useState('')
+  const enough = preview || (bal != null && bal >= minHold)
   const valid = f.name.trim() && f.image.trim() && f.audio.trim() && f.price !== '' && Number(f.price) >= 0
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!valid) return
+    if (preview) { setNote(NOT_LIVE); return }
     tx.run('Creating track…', 0n, () =>
       tx.writeContractAsync({ chainId: n.chainId, address: music, abi: musicAbi, functionName: 'createTrack',
         args: [f.name.trim(), f.image.trim(), f.audio.trim(), parseUnits(f.price, decimals), BigInt(f.max || 0)] }),
@@ -122,13 +129,13 @@ function CreateTrack({ n, music, decimals, minHold, burnBps, feeBps, onDone }: {
       </div>
       {f.image && <img className="create-preview" src={media(f.image)} alt="" />}
       {f.audio && <audio controls preload="none" src={media(f.audio)} />}
-      {!tx.address ? <p className="muted">Connect an EVM wallet to create.</p> : (
+      {!tx.address && !preview ? <p className="muted">Connect an EVM wallet to create.</p> : (
         <>
-          <p className="muted">Your balance: <b>{bal != null ? fmt(bal, decimals) : '…'} {SYM}</b></p>
+          {tx.address && <p className="muted">Your balance: <b>{bal != null ? fmt(bal, decimals) : '…'} {SYM}</b></p>}
           <button className="btn" disabled={!valid || !enough || !!tx.busy}>{tx.busy || (enough ? 'Create music NFT' : `Need ${fmt(minHold, decimals)} ${SYM}`)}</button>
         </>
       )}
-      {tx.err && <p className="err">{tx.err}</p>}
+      {(tx.err || note) && <p className="err">{tx.err || note}</p>}
     </form>
   )
 }
@@ -158,6 +165,30 @@ function NetworkMusic({ n }: { n: Network }) {
   )
 }
 
+// Layout preview only (?preview): same components, no chain reads or writes
+const cover = (a: string, b: string) =>
+  'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="50" r="30" fill="#0e0c0b"/><circle cx="50" cy="50" r="9" fill="${a}"/></svg>`)
+const SAMPLE: [string, string, string, number, number, number][] = [
+  ['Late Night Pressing', '#ff5a1f', '#2a1a12', 25, 37, 100],
+  ['Side A, Track 1', '#CCFF00', '#1a2a12', 10, 212, 0],
+  ['Basement Tapes', '#9945FF', '#12122a', 50, 18, 50],
+  ['Low Tide', '#0052FF', '#0e1a2a', 5, 50, 50],
+]
+function PreviewMusic({ n }: { n: Network }) {
+  const one = 10n ** 18n
+  const tracks: Track[] = SAMPLE.map(([name, a, b, price, minted, max]) => ({
+    name, image: cover(a, b), audio: '', price: BigInt(price) * one, minted: BigInt(minted), maxSupply: BigInt(max),
+    artist: keccak256(toHex(name)).slice(0, 42) as Address,
+  }))
+  const zero = '0x0000000000000000000000000000000000000000' as Address
+  return (
+    <div className="music-grid">
+      <div className="tracks">{tracks.map((t, i) => <TrackCard key={i} n={n} music={zero} id={BigInt(tracks.length - 1 - i)} t={t} decimals={18} onDone={() => {}} preview />)}</div>
+      <CreateTrack n={n} music={zero} decimals={18} minHold={1000n * one} burnBps={200} feeBps={300} onDone={() => {}} preview />
+    </div>
+  )
+}
+
 export function MusicSection() {
   const [tab, setTab] = useState(activeEvm[0]?.key)
   const n = activeEvm.find((x) => x.key === tab)
@@ -175,6 +206,7 @@ export function MusicSection() {
           )}
           {n && (musicOf(n)
             ? <NetworkMusic key={n.key} n={n} />
+            : PREVIEW ? <PreviewMusic key={n.key} n={n} />
             : <div className="empty small"><div className="empty-disc" /><h3>Music NFT contract not live on {n.name} yet.</h3><p>Minting opens here as soon as it is deployed.</p></div>)}
         </>
       )}
