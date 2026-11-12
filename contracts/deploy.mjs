@@ -28,7 +28,13 @@ if (!token) { console.error(`No ${cfg.symbol} contract address for ${NETWORK} in
 
 const transport = http(RPC_URL || chain.rpcUrls.default.http[0])
 const pub = createPublicClient({ chain, transport })
-const account = privateKeyToAccount(PRIVATE_KEY)
+// Accept keys with or without 0x, strip spaces/quotes from copy-paste
+const key = PRIVATE_KEY.trim().replace(/^["']|["']$/g, '').replace(/^0x/i, '')
+if (!/^[0-9a-fA-F]{64}$/.test(key)) {
+  console.error(`PRIVATE_KEY must be 64 hex characters (got ${key.length} characters). Copy it again from your wallet: Account details → Show private key.`)
+  process.exit(1)
+}
+const account = privateKeyToAccount(`0x${key}`)
 const wallet = createWalletClient({ chain, transport, account })
 
 const decimals = await pub.readContract({ address: token, abi: erc20Abi, functionName: 'decimals' })
