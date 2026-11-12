@@ -6,7 +6,7 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { createPublicClient, createWalletClient, http, erc20Abi, parseUnits, defineChain } from 'viem'
+import { createPublicClient, createWalletClient, http, erc20Abi, parseUnits, formatEther, defineChain } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { base, bsc } from 'viem/chains'
 
@@ -54,7 +54,19 @@ const minHold = parseUnits(String(process.env.MIN_HOLD ?? 1000), decimals)
 console.log(`Deploying MusizMusic on ${chain.name}\n  pay token ${symbol} ${token} (${decimals} decimals)\n  owner ${account.address}\n  treasury ${TREASURY}\n  burn ${burnBps / 100}%  fee ${feeBps / 100}%  min hold ${process.env.MIN_HOLD ?? 1000} ${symbol}`)
 
 const { abi, bytecode } = JSON.parse(fs.readFileSync(path.join(here, 'build/MusizMusic.json'), 'utf8'))
-const hash = await wallet.deployContract({ abi, bytecode, args: [token, account.address, TREASURY, burnBps, feeBps, minHold] })
+
+// Gas: Arbitrum-style chains cap gas estimates by the sender's balance, so check funds first.
+const ethBal = await pub.getBalance({ address: account.address })
+const { maxFeePerGas = 0n } = await pub.estimateFeesPerGas().catch(() => ({}))
+const gas = process.env.GAS_LIMIT ? BigInt(process.env.GAS_LIMIT) : 20_000_000n
+const needed = gas * maxFeePerGas
+console.log(`  deployer ETH ${formatEther(ethBal)}  · max gas cost ≈ ${formatEther(needed)} ETH (gas limit ${gas})`)
+if (ethBal === 0n || ethBal < needed) {
+  console.error(`Not enough ETH on ${chain.name} in ${account.address}. Send at least ${formatEther(needed)} ETH (a little more is safer) and run again.`)
+  process.exit(1)
+}
+
+const hash = await wallet.deployContract({ abi, bytecode, gas, args: [token, account.address, TREASURY, burnBps, feeBps, minHold] })
 console.log('tx', hash)
 const { contractAddress, status } = await pub.waitForTransactionReceipt({ hash })
 if (status !== 'success') { console.error('deploy failed'); process.exit(1) }
