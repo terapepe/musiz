@@ -15,8 +15,6 @@ const musicOf = (n: Network) => ((MUSIC[n.key] || '').trim() as Address) || unde
 export const media = (u: string) =>
   u.startsWith('ipfs://') ? GW + u.slice(7).replace(/^ipfs\//, '') : u.startsWith('ar://') ? 'https://arweave.net/' + u.slice(5) : u
 
-// ?preview in the URL renders the full Music UI before the contract is deployed (actions disabled)
-const PREVIEW = typeof location !== 'undefined' && new URLSearchParams(location.search).has('preview')
 const NOT_LIVE = 'Opens when the music contract is live.'
 
 const fmt = (v: bigint, d: number) => Number(formatUnits(v, d)).toLocaleString('en', { maximumFractionDigits: 4 })
@@ -165,14 +163,14 @@ function NetworkMusic({ n }: { n: Network }) {
   )
 }
 
-// Layout preview only (?preview): same components, no chain reads or writes
+// Shown until the music contract is deployed: same components, no chain reads or writes
 const cover = (a: string, b: string) =>
   'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="100" height="100" fill="url(#g)"/><circle cx="50" cy="50" r="30" fill="#0e0c0b"/><circle cx="50" cy="50" r="9" fill="${a}"/></svg>`)
 const SAMPLE: [string, string, string, number, number, number][] = [
-  ['Late Night Pressing', '#ff5a1f', '#2a1a12', 25, 37, 100],
-  ['Side A, Track 1', '#CCFF00', '#1a2a12', 10, 212, 0],
-  ['Basement Tapes', '#9945FF', '#12122a', 50, 18, 50],
-  ['Low Tide', '#0052FF', '#0e1a2a', 5, 50, 50],
+  ['Late Night Pressing', '#ff5a1f', '#2a1a12', 25_000, 0, 100],
+  ['Side A, Track 1', '#CCFF00', '#1a2a12', 60_000, 0, 0],
+  ['Basement Tapes', '#9945FF', '#12122a', 150_000, 0, 50],
+  ['Low Tide', '#0052FF', '#0e1a2a', 300_000, 0, 25],
 ]
 function PreviewMusic({ n }: { n: Network }) {
   const one = 10n ** 18n
@@ -206,8 +204,7 @@ export function MusicSection() {
           )}
           {n && (musicOf(n)
             ? <NetworkMusic key={n.key} n={n} />
-            : PREVIEW ? <PreviewMusic key={n.key} n={n} />
-            : <div className="empty small"><div className="empty-disc" /><h3>Music NFT contract not live on {n.name} yet.</h3><p>Minting opens here as soon as it is deployed.</p></div>)}
+            : <PreviewMusic key={n.key} n={n} />)}
         </>
       )}
     </section>
