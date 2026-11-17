@@ -9,6 +9,7 @@ In `src/config/token.json`:
 
 ## Token contract addresses
 `evmAddress` is shared by Base/BNB/Robinhood, `solanaAddress` for Solana. `chains.<key>` overrides `name`, `short`, `color`, `tagline`, `ca` per network (empty `ca` → shared address).
+On load the site asks hybot (`https://hybot.xyz/api/site-token?site=<token.site host>`, override with `VITE_TOKEN_API`) for the newest token launched with this website and uses its CA, name, symbol, X and Telegram (an empty link is hidden); if hybot has none or is unreachable, `token.json` is used.
 Networks with the same CA are grouped into one "Copy CA" button (e.g. "Copy RH/BASE/BSC CA") — no Buy links. Vercel redeploys on push; live price/liquidity comes from DexScreener.
 
 ## Dev

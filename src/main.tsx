@@ -1,20 +1,25 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { Providers } from './wallet/Providers'
-import App from './App'
+import token from './config/token.json'
 import './styles.css'
-import { activeNetworks, inkOn, isSingle, names, primary } from './config/chains'
 
-// Per-network look: single mode takes the network color as accent; texts follow active networks
-if (isSingle) {
-  document.documentElement.style.setProperty('--accent', primary.color)
-  document.documentElement.style.setProperty('--accent-ink', inkOn(primary.color))
+// CA, name, symbol, X and Telegram follow the newest token hybot launched for this site (token.json = fallback).
+// Synced before the app modules load, since chains.ts / components read token.json at import time.
+const API = import.meta.env.VITE_TOKEN_API || 'https://hybot.xyz/api/site-token'
+
+type Live = { found?: boolean; ca?: string; name?: string; symbol?: string; x?: string; telegram?: string }
+async function syncToken() {
+  try {
+    const site = new URL(token.site).hostname
+    const r = await fetch(`${API}?site=${encodeURIComponent(site)}`, { signal: AbortSignal.timeout(2500) })
+    const j: Live = await r.json()
+    if (!j.found || !/^0x[0-9a-fA-F]{40}$/.test(j.ca || '')) return
+    const t = token as typeof token & { chains: Record<string, { ca?: string }> }
+    t.evmAddress = j.ca!
+    if (t.chains[t.singleNetwork]) t.chains[t.singleNetwork].ca = '' // EVM networks use evmAddress
+    if (j.name) t.name = j.name
+    if (j.symbol) t.symbol = j.symbol
+    t.x = j.x || '' // no link on the launched token → no link on the site
+    t.telegram = j.telegram || ''
+  } catch { /* hybot unreachable: keep token.json */ }
 }
-const desc = document.querySelector('meta[name="description"]')
-desc?.setAttribute('content', `Fan-funded album launchpad for independent artists. Escrowed pledges, milestone unlocks, Access Pass NFTs on ${names(activeNetworks, 'and')}.`)
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Providers><App /></Providers>
-  </React.StrictMode>,
-)
+syncToken().then(() => import('./boot'))

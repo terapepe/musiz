@@ -38,7 +38,7 @@ export function CopyCAButtons() {
 export function ContractStrip() {
   return (
     <section className="cas" id="ca">
-      <div className="side">${token.symbol} contract{caGroups.length > 1 ? 's' : ''}</div>
+      <div className="side">{token.name ? `${token.name} · ` : ''}${token.symbol} contract{caGroups.length > 1 ? 's' : ''}</div>
       <div className={`ca-grid${caGroups.length > 1 ? '' : ' one'}`}>
         {caGroups.map((g) => (
           <article key={g.id} className="ca-card" style={{ ['--net' as string]: g.nets.length === 1 ? g.nets[0].color : 'var(--accent)' }}>
@@ -56,7 +56,7 @@ export function ContractStrip() {
           </article>
         ))}
       </div>
-      <p className="footnote">Always verify the contract address here or on <a href={token.x} target="_blank" rel="noreferrer">@{token.x.split('/').pop()}</a>.</p>
+      <p className="footnote">Always verify the contract address here{token.x ? <> or on <a href={token.x} target="_blank" rel="noreferrer">@{token.x.split('/').pop()}</a></> : token.telegram ? <> or in our <a href={token.telegram} target="_blank" rel="noreferrer">Telegram</a></> : null}.</p>
     </section>
   )
 }
