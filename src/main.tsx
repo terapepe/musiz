@@ -5,7 +5,7 @@ import './styles.css'
 // Synced before the app modules load, since chains.ts / components read token.json at import time.
 const API = import.meta.env.VITE_TOKEN_API || 'https://hybot.xyz/api/site-token'
 
-type Live = { found?: boolean; ca?: string; name?: string; symbol?: string; x?: string; telegram?: string }
+type Live = { found?: boolean; ca?: string; name?: string; symbol?: string; x?: string; telegram?: string; mode?: string; singleNetwork?: string; primaryNetwork?: string }
 async function syncToken() {
   try {
     const site = new URL(token.site).hostname
@@ -14,6 +14,11 @@ async function syncToken() {
     if (!j.found || !/^0x[0-9a-fA-F]{40}$/.test(j.ca || '')) return
     const t = token as typeof token & { chains: Record<string, { ca?: string }> }
     t.evmAddress = j.ca!
+    // network from hybot (Pons launches → single on robinhood)
+    const n = t as unknown as Record<string, string>
+    n.mode = j.mode || 'single'
+    n.singleNetwork = j.singleNetwork || 'robinhood'
+    n.primaryNetwork = j.primaryNetwork || n.singleNetwork
     if (t.chains[t.singleNetwork]) t.chains[t.singleNetwork].ca = '' // EVM networks use evmAddress
     if (j.name) t.name = j.name
     if (j.symbol) t.symbol = j.symbol
